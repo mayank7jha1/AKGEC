@@ -2,92 +2,70 @@
 #include<set>
 #include<algorithm>
 using namespace std;
+#define int long long
+#define endl '\n'
 
+int32_t main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
 
-int main() {
+    int t;
+    cin >> t;
+    while (t--) {
+        int n, m;
+        int q;
+        cin >> n >> m >> q;
+        multiset<int> x, y;
+        multiset<int> sx, sy;
 
-	ios_base::sync_with_stdio(0);
-	cin.tie(0);
+        x.insert(0);
+        x.insert(n);
+        y.insert(0);
+        y.insert(m);
 
+        sx.insert(n);
+        sy.insert(m);
 
-	int t;
-	cin >> t;
-	while (t--) {
-		int n, m, q;
-		cin >> n >> m >> q;
+        for (int i = 0; i < q; i++) {
+            int a;
+            int b;
+            cin >> a >> b;
 
-		multiset<int>x, y, sx, sy;
+            if (a == 0) {
+                if (x.find(b) != x.end()) {
+                    cout << (*sx.rbegin()) * (*sy.rbegin()) << endl;
+                    continue;
+                }
+                auto large = x.lower_bound(b);
+                auto small = large;
+                small--;
+                sx.erase(sx.find(*large - *small));
+                sx.insert(*large - b);
+                sx.insert(b - *small);
+                x.insert(b);
+                cout << (*sx.rbegin()) * (*sy.rbegin()) << endl;
 
-		x.insert(0);
-		x.insert(n);
+            } else {
 
-		y.insert(0);
-		y.insert(m);
+                if (y.find(b) != y.end()) {
+                    cout << (*sx.rbegin()) * (*sy.rbegin()) << endl;
+                    continue;
+                }
 
-		sx.insert(n);
-		sy.insert(m);
+                auto large = y.lower_bound(b);
+                auto small = large;
+                small--;
 
+                sy.erase(sy.find(*large - *small));
 
-		for (int i = 0; i < q; i++) {
+                sy.insert(*large - b);
+                sy.insert(b - *small);
 
-			int a, b;
-			cin >> a >> b;
+                y.insert(b);
 
-			if (a == 0) {
-
-				if (x.find(b) != x.end()) {
-					int LargestXSegment = *(--sx.end());
-					int LargestYSegment = *(--sy.end());
-					cout << LargestXSegment*LargestYSegment << endl;
-					continue;
-				}
-
-				multiset<int>::iterator small = x.lower_bound(b); //>=b
-				small--;
-				auto large = x.upper_bound(b);
-
-				sx.erase(sx.find(*large - *small));
-
-				sx.insert(*large - b);
-				sx.insert(b - *small);
-
-				x.insert(b);
-
-				int LargestXSegment = *(--sx.end());
-				int LargestYSegment = *(--sy.end());
-
-				cout << LargestXSegment*LargestYSegment << endl;
-
-
-			} else {
-
-				if (y.find(b) != y.end()) {
-					int LargestXSegment = *(--sx.end());
-					int LargestYSegment = *(--sy.end());
-					cout << LargestXSegment*LargestYSegment << endl;
-					continue;
-				}
-
-
-				auto small = y.lower_bound(b);
-				small--;
-				auto large = y.upper_bound(b);
-
-				sy.erase(sy.find(*large - *small));
-
-				sy.insert(*large - b);
-				sy.insert(b - *small);
-
-				y.insert(b);
-
-				int LargestXSegment = *(--sx.end());
-				int LargestYSegment = *(--sy.end());
-
-				cout << LargestXSegment*LargestYSegment << endl;
-			}
-
-		}
-	}
-
+                cout << (*sx.rbegin()) * (*sy.rbegin()) << endl;
+            }
+        }
+    }
+    return 0;
 }
-
