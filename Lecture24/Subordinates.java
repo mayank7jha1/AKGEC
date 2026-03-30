@@ -2,68 +2,60 @@ import java.io.InputStream;
 import java.io.IOException;
 
 public class Subordinates {
-    
-    // Using a 2D primitive array instead of ArrayList<Integer>[]
-    static int[][] tree;
-    static int[] dp;
 
     public static void main(String[] args) throws IOException {
         InputStream in = System.in;
-        
         int n = readInt(in);
         
         int[] boss = new int[n + 1];
         int[] degree = new int[n + 1];
         
-        // Read bosses and count the out-degree (number of subordinates) for each node
+        // Read bosses and calculate the out-degree of each node
         for (int i = 2; i <= n; i++) {
             boss[i] = readInt(in);
-            degree[boss[i]]++;
+            degree[boss[i]]++; // Count how many direct children the boss has
         }
         
-        // Initialize the jagged array based on exact degrees (zero wasted memory)
-        tree = new int[n + 1][];
+        int[] dp = new int[n + 1];
+        int[] q = new int[n + 1];
+        int head = 0, tail = 0;
+        
+        // Enqueue all leaf nodes (employees with 0 subordinates)
         for (int i = 1; i <= n; i++) {
-            tree[i] = new int[degree[i]];
+            if (degree[i] == 0) {
+                q[tail++] = i;
+            }
         }
         
-        // Populate the tree (Directed edges: Boss -> Subordinate)
-        int[] ptr = new int[n + 1];
-        for (int i = 2; i <= n; i++) {
-            int b = boss[i];
-            tree[b][ptr[b]++] = i;
+        // Process from bottom to top (Iterative Topological Sort)
+        while (head < tail) {
+            int current = q[head++];
+            int currentBoss = boss[current];
+            
+            // If the current node has a boss, pass the subordinate count upwards
+            if (currentBoss != 0) {
+                dp[currentBoss] += dp[current] + 1;
+                degree[currentBoss]--;
+                
+                // If the boss has received counts from all direct children, enqueue the boss
+                if (degree[currentBoss] == 0) {
+                    q[tail++] = currentBoss;
+                }
+            }
         }
         
-        dp = new int[n + 1];
-        
-        // Start DFS from the general director
-        solve(1);
-        
-        // Pre-allocate StringBuilder capacity to prevent resizing
-        StringBuilder sb = new StringBuilder(n * 6);
+        // Fast Output
+        StringBuilder sb = new StringBuilder(n * 8);
         for (int i = 1; i <= n; i++) {
             sb.append(dp[i]).append(' ');
         }
-        
         System.out.println(sb.toString());
-    }
-    
-    static void solve(int node) {
-        int subordinateCount = 0;
-        
-        // Iterate through primitive array (highly cache-friendly)
-        for (int child : tree[node]) {
-            solve(child);
-            subordinateCount += 1 + dp[child];
-        }
-        
-        dp[node] = subordinateCount;
     }
     
     // Custom byte-level reader for maximum I/O speed
     static int readInt(InputStream in) throws IOException {
         int c = in.read();
-        while (c <= 32) { // Skip whitespaces
+        while (c <= 32) {
             if (c == -1) return -1;
             c = in.read();
         }
